@@ -3,14 +3,15 @@
 
 class SXP_spawn
 {
-	class area
-	{
-		file = "sxp_aiSpawn\functions\area";
-		class areaCreate {};
-	};
 	class common
 	{
 		file = "sxp_aiSpawn\functions\common";
 		class preInit {preInit = 1;};
+	};
+	class garrison
+	{
+		file = "sxp_aiSpawn\functions\garrison";
+		class garrisonCreate {};
+		class garrisonSpawn {};
 	};
 };

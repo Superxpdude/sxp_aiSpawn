@@ -8,7 +8,8 @@
 	Parameters:
 		0: Object - Trigger
 		1: String - Garrison list to use
-		2: Number (Opt) - Number of units to spawn. Uses number in garrison list when undefined.
+		2: String - ID. Used to keep track of which group a unit was spawned with.
+		3: Number (Opt) - Number of units to spawn. Uses number in garrison list when undefined.
 		
 	Returns: Nothing
 */
@@ -19,6 +20,7 @@ if (!isServer) exitWith {};
 params [
 	["_trigger", nil, [objNull]],
 	["_list", nil, [""]],
+	["_id", "", [""]],
 	["_amount", nil, [0]]
 ];
 
@@ -31,11 +33,13 @@ private _triggerRange = if ((triggerArea _trigger) select 3) then {
 	(triggerArea _trigger) select 0
 };
 
+if (_id == "") then {_id == (triggerText _trigger)};
+
 // Get our config values
-private _baseConfig = (missionConfigFile >> "SXP_spawn" >> "garrisons" >> "list");
+private _baseConfig = (missionConfigFile >> "SXP_spawn" >> "garrisons" >> _list);
 private _side = [west, east, independent, civilian] select ([(_baseConfig >> "side") call BIS_fnc_getCfgData] param [0, 0, [0]]);
 private _unitTypes = [(_baseConfig >> "units") call BIS_fnc_getCfgDataArray] param [0, [], [[]]];
-private _unitWeights = [(_baseConfig >> "units") call BIS_fnc_getCfgDataArray] param [0, [], [[]], [0, count _unitList]];
+private _unitWeights = [(_baseConfig >> "unitWeights") call BIS_fnc_getCfgDataArray] param [0, [], [[]], [0, count _unitTypes]];
 private _unitCount = if (!isNil "_amount") then {_amount} else {[(_baseConfig >> "unitCount") call BIS_fnc_getCfgData] param [0, 0, [0]]};
 private _buildingBlacklist = [(_baseConfig >> "buildingBlacklist") call BIS_fnc_getCfgDataArray] param [0, [], [[]]];
 private _buildingOccupancy = [(_baseConfig >> "buildingOccupancy") call BIS_fnc_getCfgData] param [0, 1, [0]];
@@ -56,7 +60,7 @@ private _buildingPositions = [];
 
 // Create a group for our garrison
 private _group = createGroup _side;
-SXP_spawn_groups pushBack _group;
+SXP_spawn_groups pushBack [_id, _group];
 
 // Start spawning the units
 for [{_i = 0}, {(_i < _unitCount) AND ((count _buildingPositions) > 0)}, {_i = _i + 1}] do {
@@ -66,12 +70,12 @@ for [{_i = 0}, {(_i < _unitCount) AND ((count _buildingPositions) > 0)}, {_i = _
 	} else {
 		selectRandom _unitTypes;
 	};
-	private _unit = _group createUnit [_unitType, _pos, [], 0, "NONE"];
+	private _unit = _group createUnit [_unitClass, _pos, [], 0, "NONE"];
 	_unit setPosATL _pos;
 	_unit setUnitPos "UP";
 	_unit forceSpeed 0;
 	_unit disableAI "PATH";
-	SXP_spawn_units pushback _unit;
+	SXP_spawn_units pushback [_id, _unit];
 	_buildingPositions deleteAt (_buildingPositions find _pos);
 };
 

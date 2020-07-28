@@ -5,7 +5,7 @@ class SXP_spawn
 		class example
 		{
 			side = 0; // BLUFOR
-			units[] = {"B_soldier_SL_F", "B_Soldier_F"} // Array of unit classnames
+			units[] = {"B_soldier_SL_F", "B_Soldier_F"}; // Array of unit classnames
 			unitWeights[] = {}; // Optional. If empty, all units have equal weight
 			unitCount = 30; // Default unit count for garrison list.
 			buildingBlacklist[] = {}; // Building blacklist for this garrison
