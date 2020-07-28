@@ -1,5 +1,17 @@
 class SXP_spawn
 {
+	class garrisons
+	{
+		class example
+		{
+			side = 0; // BLUFOR
+			units[] = {"B_soldier_SL_F", "B_Soldier_F"} // Array of unit classnames
+			unitWeights[] = {}; // Optional. If empty, all units have equal weight
+			unitCount = 30; // Default unit count for garrison list.
+			buildingBlacklist[] = {}; // Building blacklist for this garrison
+			buildingOccupancy = 0.75; // % of a single building that can be occupied
+		};
+	};
 	class spawnLists
 	{
 		class example

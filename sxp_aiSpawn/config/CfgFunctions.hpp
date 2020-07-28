@@ -11,6 +11,6 @@ class SXP_spawn
 	class common
 	{
 		file = "sxp_aiSpawn\functions\common";
-		class init {postInit = 1;};
+		class preInit {preInit = 1;};
 	};
 };
