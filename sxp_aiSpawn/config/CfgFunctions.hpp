@@ -6,6 +6,7 @@ class SXP_spawn
 	class common
 	{
 		file = "sxp_aiSpawn\functions\common";
+		class activate {};
 		class preInit {preInit = 1;};
 	};
 	class garrison

@@ -60,6 +60,7 @@ private _buildingPositions = [];
 
 // Create a group for our garrison
 private _group = createGroup _side;
+private _units = [];
 _group setVariable ["SXP_spawn_id", _id, true];
 _group setVariable ["SXP_spawn_type", "garrison", true];
 SXP_spawn_groups pushBack [_id, _group];
@@ -79,8 +80,14 @@ for [{_i = 0}, {(_i < _unitCount) AND ((count _buildingPositions) > 0)}, {_i = _
 	_unit disableAI "PATH";
 	_unit setVariable ["SXP_spawn_id", _id, true];
 	_unit setVariable ["SXP_spawn_type", "garrison", true];
+	_units pushBack _unit;
 	SXP_spawn_units pushback [_id, _unit];
 	_buildingPositions deleteAt (_buildingPositions find _pos);
 };
+
+// Add all units spawned to all curators
+{
+	_x addCuratorEditableObjects [_units, true];
+} forEach allCurators;
 
 _group deleteGroupWhenEmpty true;
