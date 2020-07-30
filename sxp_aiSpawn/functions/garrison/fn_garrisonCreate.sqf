@@ -37,11 +37,10 @@ _triggers = [_logic, "EmptyDetector", false] call BIS_fnc_synchronizedObjects;
 		case (count (vehicleVarName _logic) > 0): {vehicleVarName _logic};
 		default {str (ceil (random 100000))};
 	};
-	if (_queue isEqualTo true) then {_queue = _id};
 	private _args = [_x, _list, _id, _amount];
-	if (_queue isEqualType "") then {
-		SXP_spawn_queue pushBack [_queue,"garrison",_args];
-	} else {
+	if (_queue isEqualTo false) then {
 		_args spawn SXP_spawn_fnc_garrisonSpawn;
+	} else {
+		SXP_spawn_queue pushBack [_id,"garrison",_args];
 	};
 } forEach _triggers;

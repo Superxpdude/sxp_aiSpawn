@@ -52,7 +52,8 @@ private _buildingPositions = [];
 // Iterate through all of the buildings that we found, and grab the valid AI positions.
 {
 	if ((typeOf _x) in _buildingBlacklist) exitWith {};
-	private _positions = [_x] call BIS_fnc_buildingPositions;
+	// Grab a list of positions. Ignore positions that already have a unit there.
+	private _positions = ([_x] call BIS_fnc_buildingPositions) select {count (_x nearEntities [["Man"],0.5]) <= 0};
 	_positions = _positions call BIS_fnc_arrayShuffle; // Shuffle the positions array
 	_positions resize (ceil ((count _positions) * _buildingOccupancy)); // Eliminate extra positions according to occupancy limit
 	_buildingPositions append _positions;
@@ -67,12 +68,16 @@ SXP_spawn_groups pushBack [_id, _group];
 
 // Start spawning the units
 for [{_i = 0}, {(_i < _unitCount) AND ((count _buildingPositions) > 0)}, {_i = _i + 1}] do {
+	
+	// Select our position and unit type
 	private _pos = selectRandom _buildingPositions;
 	private _unitClass = if ((count _unitWeights) == (count _unitTypes)) then {
 		_unitTypes selectRandomWeighted _unitWeights
 	} else {
 		selectRandom _unitTypes;
 	};
+	
+	// Spawn the unit
 	private _unit = _group createUnit [_unitClass, _pos, [], 0, "NONE"];
 	_unit setPosATL _pos;
 	_unit setUnitPos "UP";
@@ -80,9 +85,34 @@ for [{_i = 0}, {(_i < _unitCount) AND ((count _buildingPositions) > 0)}, {_i = _
 	_unit disableAI "PATH";
 	_unit setVariable ["SXP_spawn_id", _id, true];
 	_unit setVariable ["SXP_spawn_type", "garrison", true];
+	
+	// Add the unit to our arrays
 	_units pushBack _unit;
 	SXP_spawn_units pushback [_id, _unit];
+	
+	// Make sure that the position is no longer used.
 	_buildingPositions deleteAt (_buildingPositions find _pos);
+	
+	// Rotate the unit to ensure a good line of sight
+	// Inspiration taken from the "Achilles" zeus mod's garrison function
+	private _eyePos = eyePos _unit; // Grab the position of the unit's eyes
+	private _startAngle = (round random 360); // Start at a random angle
+	// Check every 10 degrees until we find a direction that has a good line of sight
+	for "_angle" from _startAngle to (_startAngle + 360) step 10 do {
+		// Check to see if we have a good line of sight
+		_relPos = [10 * (sin _angle), 10 * (cos _angle), 0];
+		if !(lineIntersects [_eyePos, _eyePos vectorAdd _relPos]) exitWith {
+			// If we have a good line of sight, exit.
+			_unit doWatch (_pos vectorAdd _relPos);
+		};
+		
+		// Check to see if we have a decent line of sight
+		_relPos = [3 * (sin _angle), 3 * (cos _angle), 0];
+		if !(lineIntersects [_eyePos, _eyePos vectorAdd _relPos]) then {
+			// If we have a decent line of sight, continue to try and find a good one.
+			_unit doWatch (_pos vectorAdd _relPos);
+		};
+	};
 };
 
 // Add all units spawned to all curators
@@ -91,3 +121,7 @@ for [{_i = 0}, {(_i < _unitCount) AND ((count _buildingPositions) > 0)}, {_i = _
 } forEach allCurators;
 
 _group deleteGroupWhenEmpty true;
+_group enableDynamicSimulation true;
+
+// Add the ID to the activated list
+SXP_spawn_activated pushBackUnique _id;

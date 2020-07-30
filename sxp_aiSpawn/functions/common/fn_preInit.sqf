@@ -20,3 +20,5 @@ SXP_spawn_units = [];
 SXP_spawn_groups = [];
 // All *pending* spawns for the spawning system. Used in cases where you want to trigger spawns at a specific time
 SXP_spawn_queue = [];
+// List of "activated" IDs. Used to determine if an area has been spawned in yet.
+SXP_spawn_activated = [];
